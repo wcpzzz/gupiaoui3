@@ -1,85 +1,104 @@
 <template>
-  <div class="app-container">
-    <el-form ref="form" :model="form" label-width="120px">
-      <el-form-item label="Activity name">
-        <el-input v-model="form.name" />
+  <div class="app-container common-list-page">
+    <el-form
+      :model="resetForm"
+      :rules="resetFormRules"
+      ref="resetForm"
+      status-icon
+      label-width="100px"
+    >
+      <el-form-item label="旧密码：" prop="password">
+        <el-input type="password" v-model="resetForm.password" auto-complete="off" maxlength="20"></el-input>
       </el-form-item>
-      <el-form-item label="Activity zone">
-        <el-select v-model="form.region" placeholder="please select your zone">
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select>
+      <el-form-item label="新密码：" prop="newpassword">
+        <el-input type="password" v-model="resetForm.newpassword" auto-complete="off" maxlength="20"></el-input>
       </el-form-item>
-      <el-form-item label="Activity time">
-        <el-col :span="11">
-          <el-date-picker v-model="form.date1" type="date" placeholder="Pick a date" style="width: 100%;" />
-        </el-col>
-        <el-col :span="2" class="line">-</el-col>
-        <el-col :span="11">
-          <el-time-picker v-model="form.date2" type="fixed-time" placeholder="Pick a time" style="width: 100%;" />
-        </el-col>
-      </el-form-item>
-      <el-form-item label="Instant delivery">
-        <el-switch v-model="form.delivery" />
-      </el-form-item>
-      <el-form-item label="Activity type">
-        <el-checkbox-group v-model="form.type">
-          <el-checkbox label="Online activities" name="type" />
-          <el-checkbox label="Promotion activities" name="type" />
-          <el-checkbox label="Offline activities" name="type" />
-          <el-checkbox label="Simple brand exposure" name="type" />
-        </el-checkbox-group>
-      </el-form-item>
-      <el-form-item label="Resources">
-        <el-radio-group v-model="form.resource">
-          <el-radio label="Sponsor" />
-          <el-radio label="Venue" />
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="Activity form">
-        <el-input v-model="form.desc" type="textarea" />
+      <el-form-item label="确认密码：" prop="newPwd">
+        <el-input type="password" v-model="resetForm.newPwd" auto-complete="off" maxlength="20"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">Create</el-button>
-        <el-button @click="onCancel">Cancel</el-button>
+        <el-button  :loading="loading" type="primary" @click.native.prevent="toAmend">确认修改</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      form: {
-        name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
+  import {api} from "@/api/changePwd";//这是我个人全局定义单独用来接收url接口的文件，不作参考
+  /*import { getUsername } from "@/utils/auth";//这是我个人调用封装获取当前账户的username，不作参考*/
+  export default {
+    data() {
+      var validatePass = (rule, value, callback) => {
+        if (!value) {
+          callback(new Error("请输入新密码"));
+        } else if (value.toString().length < 6 || value.toString().length > 18) {
+          callback(new Error("密码长度为6-18位"));
+        } else {
+          callback();
+        }
+      };
+      var validatePass2 = (rule, value, callback) => {
+        if (value === "") {
+          callback(new Error("请再次输入密码"));
+        } else if (value !== this.resetForm.newpassword) {
+          callback(new Error("两次输入密码不一致!"));
+        } else {
+          callback();
+        }
+      };
+      return {
+        loading:false,
+        resetForm: {
+          //传给后台所需要的参数
+          newpassword: "",
+          password: "",
+        },
+        resetFormRules: {
+          password: [
+            {required: true, message: "请输入旧密码", trigger: 'blur'}
+          ],
+          newpassword: [
+            {required: true, validator: validatePass, trigger: 'blur'}
+          ],
+          newPwd: [
+            {required: true, validator: validatePass2, trigger: "blur"}
+          ]
+        }
+      };
+    },
+    methods: {
+      toAmend() {
+        this.$refs.resetForm.validate(valid => {
+            this.loading = true
+            if (valid) {
+              this.resetForm.account=this.$cookies.get("accountKey")
+              //这里的api.materialQuery.toAmend是调用前期我们统一的api接口url路径，不作参考 ，只要把后台需要的字段正常传进去即可
+              api(this.resetForm)
+                .then(() => {
+                    this.loading = false
+                    this.$notify({
+                      title: '修改成功',
+                      type: 'success',
+                      duration:2000,
+                    });
+                  }
+                )
+            }
+          }
+        )
       }
     }
-  },
-  methods: {
-    onSubmit() {
-      this.$message('submit!')
-    },
-    onCancel() {
-      this.$message({
-        message: 'cancel!',
-        type: 'warning'
-      })
-    }
   }
-}
 </script>
 
-<style scoped>
-.line{
-  text-align: center;
-}
-</style>
+<style lang="scss" scoped>
+  .el-form {
+    width: 60%;
+    margin: 50px auto 0;
+    text-align: center;
 
+    button {
+      margin: 20px 0 0;
+    }
+  }
+</style>

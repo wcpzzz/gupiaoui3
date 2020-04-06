@@ -36,7 +36,11 @@ export const constantRoutes = [
     component: () => import('@/views/login/index'),
     hidden: true
   },
-
+  {
+    path: '/register',
+    component: () => import('@/views/login/index2'),
+    hidden: true
+  },
   {
     path: '/404',
     component: () => import('@/views/404'),
@@ -44,36 +48,62 @@ export const constantRoutes = [
   },
 
   {
-    path: '/',
+    path: '/dashboard',
+    // path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    // redirect: '/dashboard',
     children: [{
-      path: 'dashboard',
+      path: '/dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'dashboard' }
     }]
   },
+  {
+    path: '/',
+    redirect: '/login',
+    component: () => import('@/views/dashboard/index'),
+  },
+
+
 
   {
     path: '/example',
     component: Layout,
-    redirect: '/example/table',
+    redirect: '/example/table2',
     name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
+    meta: { title: '股票分析', icon: 'example' },
     children: [
+      // {
+      //   path: 'table',
+      //   name: 'Table',
+      //   component: () => import('@/views/table/index'),
+      //   meta: { title: 'Table', icon: 'table' }
+      // },
+      // {
+      //   path: 'tree',
+      //   name: 'Tree',
+      //   component: () => import('@/views/tree/index'),
+      //   meta: { title: 'Tree', icon: 'tree' }
+      // },
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
+        path: 'table2',
+        name: 'Table2',
+        component: () => import('@/views/table/index2'),
+        meta: { title: '换手率分析数据', icon: 'table' }
       },
       {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
-      }
+        path: 'table3',
+        name: 'Table3',
+        component: () => import('@/views/table/index3'),
+        meta: { title: '个股相对大盘分析', icon: 'table' }
+      },
+      {
+        path: 'table4',
+        name: 'Table4',
+        component: () => import('@/views/table/junzhi'),
+        meta: { title: '均值榜', icon: 'table' }
+      },
     ]
   },
 
@@ -85,12 +115,12 @@ export const constantRoutes = [
         path: 'index',
         name: 'Form',
         component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
+        meta: { title: '信息管理', icon: 'form' }
       }
     ]
   },
 
-  {
+/*  {
     path: '/nested',
     component: Layout,
     redirect: '/nested/menu1',
@@ -146,9 +176,9 @@ export const constantRoutes = [
         meta: { title: 'menu2' }
       }
     ]
-  },
+  },*/
 
-  {
+/*  {
     path: 'external-link',
     component: Layout,
     children: [
@@ -157,7 +187,7 @@ export const constantRoutes = [
         meta: { title: 'External Link', icon: 'link' }
       }
     ]
-  },
+  },*/
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

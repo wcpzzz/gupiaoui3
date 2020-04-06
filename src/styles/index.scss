@@ -11,7 +11,14 @@ body {
   text-rendering: optimizeLegibility;
   font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
 }
-
+.filter-container {
+  padding-bottom: 10px; }
+.filter-container .filter-item {
+  display: inline-block;
+  width: 13%; }
+.app-container {
+  padding: 20px;
+}
 label {
   font-weight: 700;
 }
