@@ -1,170 +1,163 @@
 <template>
   <div class="login-container">
-    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on"
+    <el-form class="login-form" autoComplete="on" :model="loginForm" :rules="loginRules" ref="loginForm"
              label-position="left">
-      <div class="title-container">
-        <h3 class="title">操作员登录</h3>
+      <div class="title">
+        <h3>大众书局报表系统
+        </h3>
       </div>
-
-      <el-form-item prop="account">
-        <span class="svg-container">
-          <svg-icon icon-class="user"/>
+      <el-form-item prop="username">
+        <span class="svg-container svg-container_login">
+          <svg-icon icon-class="people_fill"/>
         </span>
-        <el-input
-          ref="account"
-          v-model="loginForm.account"
-          placeholder="请输入用户名"
-          name="account"
-          type="text"
-          tabindex="1"
-          auto-complete="on"
-        />
+        <el-input name="username" type="text" v-model.trim="loginForm.username" autoComplete="on"
+                  placeholder="请输入用户名" maxlength="15"/>
       </el-form-item>
-
       <el-form-item prop="password">
         <span class="svg-container">
-          <svg-icon icon-class="password"/>
+          <svg-icon icon-class="lock1"></svg-icon>
         </span>
-        <el-input
-          :key="passwordType"
-          ref="password"
-          v-model="loginForm.password"
-          :type="passwordType"
-          placeholder="请输入密码"
-          name="password"
-          tabindex="2"
-          auto-complete="on"
-          @keyup.enter.native="handleLogin"
-        />
-        <span class="show-pwd" @click="showPwd">
-          <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'"/>
-        </span>
+        <el-input name="password" :type="pwdType" @keyup.enter.native="handleLogin" v-model.trim="loginForm.password"
+                  autoComplete="on"
+                  placeholder="请输入密码" maxlength="20"></el-input>
+        <span class="show-pwd" @click="showPwd"><svg-icon icon-class="browse_fill"/></span>
       </el-form-item>
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;"
-                 @click.native.prevent="handleLogin">Login
-      </el-button>
+      <el-form-item prop="verifyCode">
+        <div style="display: flex;align-items: center">
+        <span class="svg-container">
+          <svg-icon icon-class="yanzhengma"></svg-icon>
+        </span>
+          <el-input name="verifyCode" @keyup.enter.native="handleLogin" v-model.trim="loginForm.verifyCode"
+                    autoComplete="on"
+                    v-bind:placeholder="'请输入验证码'" maxlength="4"></el-input>
+          <!--          <img :src="imgPrefix" @click="changeImg()" ref="verifyCode" style="height:80%;">-->
+          <verify></verify>
+        </div>
+      </el-form-item>
 
+      <el-form-item>
+        <el-button type="primary" style="width:100%;" :loading="loading" @click.native.prevent="handleLogin">
+          登录
+        </el-button>
+      </el-form-item>
       <div class="tips">
-        <span style="margin-right:20px;" @click="toIndex2()">点击此处注册</span>
-        <!--        <span style="margin-right:20px;">account: admin</span>-->
-        <!--        <span> password: any</span>-->
+        <!--        <span @click="changeLanguage">{{$t('login.tips')}}</span>-->
+        <p class="link">Copyright © 2015-2016<a href="https://www.ss-soft.com/" target="_Blank"> ss-soft</a>. All rights
+          reserved</p>
       </div>
-
     </el-form>
   </div>
 </template>
 
 <script>
-  import { validUsername} from '@/utils/validate'
-  import {login} from '@/api/user'
-  import Cookies from 'js-cookie'
-/*  export function getToken() {
-    return Cookies.get(TokenKey)
-  }*/
+  import verify from "./verify.vue";
+  import Cookies from "js-cookie";
 
   export default {
-    name: 'Login',
+    name: 'login',
+    components: {
+      verify
+    },
     data() {
       const validateUsername = (rule, value, callback) => {
-        if (!validUsername(value)) {
-          callback(new Error('Please enter the correct user name'))
+        if (value.length == 0) {
+          callback(new Error('请输入用户名'))
         } else {
           callback()
         }
       }
-      const validatePassword = (rule, value, callback) => {
-        if (value.length < 6) {
-          callback(new Error('The password can not be less than 6 digits'))
+      const validatePass = (rule, value, callback) => {
+        if (value.length < 5) {
+          callback(new Error('密码长度需大于4位'))
         } else {
           callback()
         }
       }
+      const validateCode = (rule, value, callback) => {
+        if (value.length != 4) {
+          callback(new Error('验证码应为4位'))
+        }else if(this.loginForm.verifyCode != Cookies.get('getIdentifyCode')){
+          callback(new Error('验证码不正确'))
+        }
+        else {
+          callback()
+        }
+      }
+
       return {
+        redirect: undefined,
+        verifyCode: '',
+        imgPrefix: process.env.BASE_API + '/admin/getCode',
         loginForm: {
-          account: 'wcp',
-          password: 'wcp123'
+          username: '',
+          password: '',
+          verifyCode: ''
         },
         loginRules: {
-          account: [{ required: true, trigger: 'blur', validator: validateUsername }],
-          password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+          username: [{required: true, trigger: 'blur', validator: validateUsername}],
+          password: [{required: true, trigger: 'blur', validator: validatePass}],
+          verifyCode: [{required: true, trigger: 'blur', validator: validateCode}]
         },
         loading: false,
-        passwordType: 'password',
-        redirect: undefined
-      }
-    },
-    watch: {
-      $route: {
-        handler: function(route) {
-          this.redirect = route.query && route.query.redirect
-        },
-        immediate: true
+        pwdType: 'password'
       }
     },
     methods: {
-      toIndex2(){
-        this.$router.push({ path: '/register'})
-      },
+      /*      changeImg() {
+              this.$refs.verifyCode.src = this.imgPrefix
+            },*/
       showPwd() {
-        if (this.passwordType === 'password') {
-          this.passwordType = ''
+        if (this.pwdType === 'password') {
+          this.pwdType = ''
         } else {
-          this.passwordType = 'password'
+          this.pwdType = 'password'
         }
-        this.$nextTick(() => {
-          this.$refs.password.focus()
-        })
+      },
+      changeLanguage() {
+        if (this.$i18n.locale === 'cn') {
+          this.$i18n.locale = 'en'
+        } else {
+          this.$i18n.locale = 'cn'
+        }
       },
       handleLogin() {
-        // this.$router.push({ path: this.redirect || '/dashboard' })
-        this.$refs.loginForm.validate(valid => {
-          if (valid) {
-            this.loading = true
-            login(this.loginForm).then(() => {
-              this.$cookies.set("accountKey", this.loginForm.account)
-              this.$router.push({ path: this.redirect || '/dashboard' })
-              this.loading = false
-            }).catch(() => {
-              this.loading = false
-            })
-          } else {
-            console.log('error submit!!')
-            return false
-          }
-        })
-
-        // this.$refs.loginForm.validate(valid => {
-        //   if (valid) {
-        //     this.loading = true
-        //     this.$store.dispatch('user/login', this.loginForm).then(() => {
-        //       this.$router.push({ path: this.redirect || '/dashboard' })
-        //       this.loading = false
-        //     }).catch(() => {
-        //       this.loading = false
-        //     })
-        //   } else {
-        //     console.log('error submit!!')
-        //     return false
-        //   }
-        // })
+        //登录
+        //判断验证码
+        /*        this.$on("getIdentifyCode", (data) => {
+                  console.log(data)
+                  this.verifyCode = data
+                })*/
+        this.verifyCode = Cookies.get('getIdentifyCode')
+        if (this.verifyCode == this.loginForm.verifyCode) {
+          //成功
+          this.$refs.loginForm.validate(valid => {
+            if (valid) {
+              this.loading = true
+              this.$store.dispatch('user/login', this.loginForm).then(() => {
+                this.loading = false
+                console.log('ok')
+                this.$router.push({ path: this.redirect || '/dashboard' })
+                console.log(this.$router)
+              }).catch(() => {
+                this.loading = false
+                this.loginForm.password = '';
+                this.loginForm.verifyCode = '';
+                // this.changeImg()
+              })
+            } else {
+              console.log('error submit!!')
+              return false
+            }
+          })
+        }
       }
     }
   }
 </script>
 
-<style lang="scss">
-  /* 修复input 背景不协调 和光标变色 */
-  /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
-
-  $bg: #283443;
-  $light_gray: #fff;
-  $cursor: #fff;
-
-  @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
-    .login-container .el-input input {
-      color: $cursor;
-    }
-  }
+<style rel="stylesheet/scss" lang="scss">
+  $bg: #2d3a4b;
+  $light_gray: #eee;
 
   /* reset element-ui css */
   .login-container {
@@ -181,11 +174,19 @@
         padding: 12px 5px 12px 15px;
         color: $light_gray;
         height: 47px;
-        caret-color: $cursor;
 
         &:-webkit-autofill {
-          box-shadow: 0 0 0px 1000px $bg inset !important;
-          -webkit-text-fill-color: $cursor !important;
+          -webkit-animation: autofill-fix 1s infinite;
+          -webkit-text-fill-color: #fff;
+        }
+
+        @-webkit-keyframes autofill-fix {
+          from {
+            background-color: transparent
+          }
+          to {
+            background-color: transparent
+          }
         }
       }
     }
@@ -197,26 +198,31 @@
       color: #454545;
     }
   }
+
 </style>
 
-<style lang="scss" scoped>
-  $bg: #2d3a4b;
-  $dark_gray: #889aa4;
-  $light_gray: #eee;
+<style rel="stylesheet/scss" lang="scss" scoped>
 
+  $bg: #1a65ba;
+  $dark_gray: #eee;
+  $light_gray: #eee;
   .login-container {
-    min-height: 100%;
+    position: fixed;
+    height: 100%;
     width: 100%;
     background-color: $bg;
-    overflow: hidden;
 
     .login-form {
-      position: relative;
-      width: 520px;
-      max-width: 100%;
-      padding: 160px 35px 0;
-      margin: 0 auto;
-      overflow: hidden;
+      position: absolute;
+      left: 0;
+      right: 0;
+      width: 375px;
+      padding: 35px 35px 15px 35px;
+      margin: 120px auto;
+    }
+
+    .language_change {
+      /*position: absolute;*/
     }
 
     .tips {
@@ -225,8 +231,22 @@
       margin-bottom: 10px;
 
       span {
+        float: right;
+
         &:first-of-type {
           margin-right: 16px;
+        }
+
+        cursor: pointer;
+      }
+
+      .link {
+        font-size: 12px;
+        text-align: center;
+        color: #9fa3ab;
+
+        a {
+          color: $light_gray;
         }
       }
     }
@@ -237,17 +257,30 @@
       vertical-align: middle;
       width: 30px;
       display: inline-block;
+
+      &_login {
+        font-size: 20px;
+      }
     }
 
-    .title-container {
+    .title {
+      font-size: 26px;
+      font-weight: 400;
+      color: $light_gray;
+      margin: 0px auto 30px auto;
       position: relative;
+      /*text-align: center;*/
+      font-weight: bold;
 
-      .title {
-        font-size: 26px;
-        color: $light_gray;
-        margin: 0px auto 40px auto;
+      .language_change {
+        position: absolute;
+        right: 0;
+        color: white;
+        font-size: 16px;
+      }
+
+      h3 {
         text-align: center;
-        font-weight: bold;
       }
     }
 

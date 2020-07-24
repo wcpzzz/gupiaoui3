@@ -30,11 +30,18 @@ module.exports = {
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
   devServer: {
+    disableHostCheck: true,
     proxy: {
-      '/gupiao': {
-        target: 'http://localhost:8088',
+      '/api': {
+        target: 'http://192.168.0.146:9602',
         pathRewrite: {
-          '^/gupiao': '/gupiao'
+          '^/api':'/'
+        }
+      },
+      '/sdp': {
+        target: 'https://sdp-pre.shijicloud.com',
+        pathRewrite: {
+          '^/sdp':'/'
         }
       }
     },

@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-
+import {online} from '@/api/login'
 Vue.use(Router)
 
 /* Layout */
 import Layout from '@/layout'
+import Cookies from 'js-cookie'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -37,11 +38,6 @@ export const constantRoutes = [
     hidden: true
   },
   {
-    path: '/register',
-    component: () => import('@/views/login/index2'),
-    hidden: true
-  },
-  {
     path: '/404',
     component: () => import('@/views/404'),
     hidden: true
@@ -56,7 +52,7 @@ export const constantRoutes = [
       path: '/dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'dashboard',needLogin: true}
     }]
   },
   {
@@ -99,10 +95,22 @@ export const constantRoutes = [
         meta: { title: '个股相对大盘分析', icon: 'table' }
       },
       {
+        path: 'table5',
+        name: 'Table5',
+        component: () => import('@/views/table/xiangliangji'),
+        meta: { title: '支持向量机', icon: 'table' }
+      },
+      {
+        path: 'table6',
+        name: 'Table6',
+        component: () => import('@/views/table/elm'),
+        meta: { title: '极限学习机', icon: 'table' }
+      },
+      {
         path: 'table4',
         name: 'Table4',
         component: () => import('@/views/table/junzhi'),
-        meta: { title: '均值榜', icon: 'table' }
+        meta: { title: '股票明细', icon: 'table' }
       },
     ]
   },
@@ -119,75 +127,6 @@ export const constantRoutes = [
       }
     ]
   },
-
-/*  {
-    path: '/nested',
-    component: Layout,
-    redirect: '/nested/menu1',
-    name: 'Nested',
-    meta: {
-      title: 'Nested',
-      icon: 'nested'
-    },
-    children: [
-      {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
-      },
-      {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        meta: { title: 'menu2' }
-      }
-    ]
-  },*/
-
-/*  {
-    path: 'external-link',
-    component: Layout,
-    children: [
-      {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
-      }
-    ]
-  },*/
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
@@ -206,5 +145,35 @@ export function resetRouter() {
   const newRouter = createRouter()
   router.matcher = newRouter.matcher // reset router
 }
+
+// 全局路由守卫
+router.beforeEach((to, from, next) => {
+  console.log('navigation-guards');
+  // to: Route: 即将要进入的目标 路由对象
+  // from: Route: 当前导航正要离开的路由
+  // next: Function: 一定要调用该方法来 resolve 这个钩子。执行效果依赖 next 方法的调用参数。
+  const nextRoute = ['home', 'good-list', 'good-detail', 'cart', 'profile'];
+  let token = Cookies.get('Admin-Token')
+  if(to.path!='login'){
+    online(token).then(()=>{
+      console.log('of')
+      next();
+    }).catch(()=>{
+      router.push({ path: 'login' })
+      next();
+    })
+  }
+  next();
+/*  // 已登录状态；当路由到login时，跳转至home
+  if (to.path === 'login') {
+    if (isLogin) {
+      router.push({ name: 'home' });
+    }
+  }*/
+
+});
+
+
+
 
 export default router

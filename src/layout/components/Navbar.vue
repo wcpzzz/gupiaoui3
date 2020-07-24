@@ -11,7 +11,7 @@
           <img src="favicon.ico" class="user-avatar">
           <i class="el-icon-caret-bottom" />
         </div>
-        <el-dropdown-menu slot="dropdown" class="user-dropdown">
+        <el-dropdown-menu slot="dropdown" class="user-dropdown" @click.native="logout">
           <router-link to="/">
             <el-dropdown-item>
               退出登录
@@ -46,8 +46,12 @@ export default {
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
-    async logout() {
+/*    async logout() {
       await this.$store.dispatch('user/logout')
+      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    }*/
+    async logout() {
+      await this.$store.dispatch('user/ledLogOut')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
     }
   }
