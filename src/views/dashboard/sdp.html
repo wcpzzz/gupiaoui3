@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>sdp-dome</title>
+
+  <link href="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/plugin/element-ui/index.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://sdp-cdn.shijicloud.com/static/images/sdp/iconFont/iconfont.css">
+  <link rel="stylesheet" href="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/app-sdp.css">
+</head>
+
+<body>
+  <div id="app">
+    <sdp-board-preview @close="alert('此处应该关闭页面')" @needRefreshToken="alert('此处写更新token代码')" v-bind="shareData"></sdp-board-preview>
+  </div>
+
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/plugin/vue.min.js"></script>
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/plugin/element-ui/index.js"></script>
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/plugin/echarts/index.js"></script>
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/plugin/v-charts/index.js"></script>
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/plugin/vue-i18n/vue-i18n.min.js"></script>
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/plugin/axios/index.js"></script>
+
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/lang/element/zh-CN.js"></script>
+  <script src="https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/lang/element/en.js"></script>
+  <script>
+    // 当前使用环境，根据需要切换
+
+    const CUR_ENV = 'pre_production' // 预发布环境
+    // const CUR_ENV = 'production' // 生产环境
+
+    // 注意，在切换环境的时候，请设置对应环境的sdpToken
+    let sdpToken =
+            'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ3ZWljcC5zcyIsInVzZXJJZCI6IjMzOTA1NDM5MDg2MDA0MjI0MDQxMCIsInVzZXJOYW1lIjoi5pmo6bmPIOmtjyIsImV4cGlyZSI6MTU5NTkwODIzOTMwOCwic3lzQ29kZSI6IjA0LTAxIiwic2lkTG9naW5EYXRlIjoibnVsbCIsInVzZXJMZXZlbCI6IjIiLCJjaGFubmVsU291cmNlcyI6IjEiLCJleHBpcmVUaW1lIjoiMTU5NTkwODIzOTMwOCIsInN5c3RlbVR5cGUiOiIwNC0wMSIsInBpZCI6InAwMDAxNyIsInRva2VudHlwZSI6InVzZXIiLCJ0ZW5hbnQiOiJ0MDA1NjUiLCJzaWQiOiIifQ.f8JcmZ0fMiXnjsQM__kMeEQg06jntOm5PaIsyRNigTNRlBZWy-Ryuv0kzs-fDqU0OOXDYVp1vhY0RmHb_MmLSRAMXpMkILhShwQ-LEHUDNJlUFSpd_xB-XrwbvqRgEmgQLfOzbFe8hN8EUulwV_y4pNlIkiR4-2H_RJiPenyYN4'
+    sessionStorage.setItem('sdpToken', sdpToken)
+
+    // 20.03版本后，JS组件提供线上引用地址，方便后续SDP团队更新。
+	const baseRoot = CUR_ENV === 'production'
+      ? 'https://sdp-cdn.shijicloud.com/static/sdp_app/web/production'
+      : 'https://sdptest.shijicloud.com/static/sdp_app/web/pre_production'
+
+    // 1、先通过version.json，读取当前环境下的最新版本号
+    // 2、根据版本号，获取对应版本代码
+
+    let i18n = {}
+    axios({
+      method: 'get',
+      url: `${ baseRoot }/version.json?refrash_t=${ Date.now() }`,
+      dataType: 'json'
+    }).then(({ data: { version } }) => {
+      console.log(version, 'version')
+      const cssPath = `${ baseRoot }/${ version }/sdp.css`
+      const jsPath = `${ baseRoot }/${ version }/sdp.umd.min.js`
+      const langPath = `${ baseRoot }/${ version }/langpackage.json`
+      Promise.all([
+        asyncLoadFile(cssPath, 'link'),
+        asyncLoadFile(jsPath),
+        asyncLoadFile(`https://sdp-cdn.shijicloud.com/static/sdp_app/web/assets/request_${CUR_ENV}.js`), // 加载axios数据请求实例
+        axios({
+          method: 'get',
+          url: langPath,
+          dataType: 'json'
+        }).then(({ data: langJSON }) => {
+          i18n = i18nHandler(langJSON)
+        })
+      ]).then(() => {
+          Vue.use(ELEMENT, {
+            size: 'small',
+            i18n: (key, value) => i18n.t(key, value)
+          })
+          renderVue()
+        })
+        .catch(err => {
+          console.log('下载报表组件失败', err)
+        })
+    })
+
+    /**
+     * 挂载 Vue
+     * */
+    function renderVue () {
+      Vue.prototype.$axiosTools = axios
+      // token，调试和正式使用时，请替换
+      let api = sdpApi
+      var app = new Vue({
+        el: '#app',
+        i18n,
+        data: {
+          message: 'Hello Vue!',
+          shareData: {
+            api,
+            env: { projectName:'SDP-Demo', production: true },
+            boardInfo: {
+              // 看板的的文件夹id和看板id
+              folderId: '340147788379574272410',
+              id: '339056696393453568410',
+            },
+            langCode: 'zh',
+            options: {
+              // SDP团队分配的租户ID，本DEMO已a025为例,
+              tenantId: 't00565',
+              type:'browse'
+            },
+            themeParameters: { themeType: '0' }, // 主题: '0'经典白,'1'暗黑蓝
+            remindData: ''
+          }
+        }
+      })
+    }
+
+    /**
+     * 异步加载文件
+     * @param langJSON 多语言翻译包
+     * @returns {} i18n插件实例
+     */
+    function i18nHandler(langJSON) {
+      Vue.use(VueI18n)
+
+      const langList = ['zh', 'en']
+      const langPackage = {}
+
+      Object.keys(langJSON).forEach(key => {
+        langList.forEach(lang => {
+          langPackage[lang] || (langPackage[lang] = {})
+          langPackage[lang][key] = {}
+          Object.keys(langJSON[key]).forEach(k => {
+            langPackage[lang][key][k] = langJSON[key][k][lang]
+          })
+        })
+      })
+
+      // 项目中加入界面多语言翻译，有以下2种方式，根据实际情况自行选择
+      // 1、如果项目已经使用i18n做了国际化，则可以使用mergeLocaleMessage将报表界面多语言翻译包合并到i18n
+      // window.Vue.i18n.mergeLocaleMessage('zh', { sdp: langPackage.zh })
+      // window.Vue.i18n.mergeLocaleMessage('en', { sdp: langPackage.en })
+
+      // 2、直接使用
+      const messages = {
+        en: {
+          ...window.elLang.en,
+          sdp: langPackage.en
+        },
+        zh: {
+          ...window.elLang.zh,
+          sdp: langPackage.zh
+        },
+      }
+      const i18n = new VueI18n({
+        locale: 'en', // set locale
+        messages, // set locale messages
+      })
+      return i18n
+    }
+
+    /**
+     * 异步加载文件
+     * @param url 请求路径
+     * @param type 标签类型
+     * @returns {Promise<unknown>}
+     */
+    function asyncLoadFile(url, type = 'script') {
+      return new Promise((resolve, reject) => {
+        let loadFile = document.createElement(type)
+        if (type === 'script') {
+          loadFile.type = 'text/javascript'
+        } else {
+          loadFile.rel = 'stylesheet'
+          loadFile.type = 'text/css'
+        }
+        loadFile[type === 'script' ? 'src' : 'href'] = url
+        document[[type === 'script' ? 'body' : 'head']].appendChild(loadFile)
+        loadFile.onload = data => {
+          resolve(data)
+        }
+        loadFile.onerror = err => {
+          reject(err)
+        }
+      })
+    }
+  </script>
+</body>
+
+</html>
