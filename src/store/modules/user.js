@@ -1,5 +1,6 @@
 import { login, logout, resetToken } from '@/api/login'
 import { getToken, getTokenSDP, setToken, setTokenSDP, removeToken,getTokenUSERSDP } from '@/utils/auth'
+import Cookies from 'js-cookie'
 //将用户数据存到state里
 const user = {
   //namespaced true 需要加前缀
@@ -121,6 +122,21 @@ const user = {
         commit('SET_TOKEN', '')
         removeToken()
         resolve()
+      })
+    },
+    loginSDP() {
+      //进行SDP登录，并且存下tokenSDP到SDP-Token
+      resetToken().then(data => {
+        /*          let temp = this.userloginform.tenantId+'_'+this.userloginform.loginName
+                  this.userloginform.encryptKey = this.encrypt(temp)
+                  //登录完了之后，再去获得SDPusertoken
+                  resetUserToken(this.userloginform)*/
+        Cookies.set('SDP-Token', data.data.data)
+        this.userloginform.loginPassword = this.encrypt(this.userloginform.loginPassword)
+        getUserToken(this.userloginform).then(data => {
+          Cookies.set('USERSDP-Token', data.data.data.token)
+          console.log(Cookies.get('USERSDP-Token'))
+        })
       })
     }
   }

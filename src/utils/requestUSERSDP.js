@@ -75,7 +75,7 @@ serviceSDP.interceptors.response.use(
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.status === 201000001 || res.status === 10000006) {
         // to re-login
-        store.dispatch('user/resetToken').then(() => {
+        store.dispatch('user/loginSDP').then(() => {
           location.reload()
         })
 /*        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {

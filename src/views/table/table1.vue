@@ -1,9 +1,11 @@
-<template>
+<!--<template>
   <div>
-    <sdp-board-preview @close="alert('此处应该关闭页面')" @needRefreshToken="alert('此处写更新token代码')"
-                       v-bind="shareData"></sdp-board-preview>
-
-    <!--    <div><a href="http://www.baidu.com">1234</a></div>-->
+    &lt;!&ndash;      <sdp-board-preview @close="alert('此处应该关闭页面')" @needRefreshToken="alert('此处写更新token代码')"
+                             v-bind="shareData"></sdp-board-preview>&ndash;&gt;
+    <div class="head">
+      <sdp-board-preview @close="() => {this.$router.go(-1)}" v-bind="shareData" class="sdp"></sdp-board-preview>
+    </div>
+    &lt;!&ndash;    <div><a href="http://www.baidu.com">1234</a></div>&ndash;&gt;
   </div>
 </template>
 <script>
@@ -11,19 +13,20 @@
   import { resetUserToken, getUserToken } from '@/api/userloginSDP'
   import Cookies from 'js-cookie'
   import axios from 'axios'
+
   export default {
     name: 'Dashboard',
     data() {
       return {
-        lang:{},
+        lang: {},
         // i18n,
         shareData: {
           api: sdpApi,
           env: { projectName: 'SDP-Demo', production: true },
           boardInfo: {
             // 看板的的文件夹id和看板id
-            folderId: '340147788379574272410',
-            id: '339056696393453568410'
+            // folderId: '340147788379574272410',
+            id: '341240565838368768410'
           },
           langCode: 'zh',
           options: {
@@ -31,7 +34,7 @@
             tenantId: 't00565',
             type: 'browse'
           },
-          themeParameters: { themeType: '0' }, // 主题: '0'经典白,'1'暗黑蓝
+          themeParameters: { themeType: '0' } // 主题: '0'经典白,'1'暗黑蓝
           // remindData: ''
         },
 
@@ -81,7 +84,7 @@
             console.log(Cookies.get('USERSDP-Token'))
           })
         })
-      },
+      }
       //尝试加载他万恶的看板
       //先用axio把他的language拉下来
 
@@ -95,3 +98,70 @@
     }
   }
 </script>
+<style scoped>
+  .head{
+    position: relative;
+
+  }
+  .sdp {
+    position: relative;
+    width:calc(100vw);
+    height:calc(100vh);
+  }
+</style>-->
+<template>
+  <div class="head">
+    <sdp-board-preview @close="() => {this.$router.go(-1)}" v-bind="shareData" class="sdp"></sdp-board-preview>
+  </div>
+</template>
+
+<script>
+  // import axios from 'axios'
+  // import { asyncLoadFile } from '../loadFile'
+  export default {
+    name: 'aaa',
+    components: {
+    },
+    data () {
+      return {
+        shareData: {
+          api: '',
+          boardInfo: {
+            id: '341240565838368768410'
+          },
+          langCode: 'zh',
+          options: {
+            tenantId: 't00565',
+            type: 'browse',
+          },
+          // themeParameters: {
+          //   isOpen: true,
+          //   themeType: '0',
+          // }
+        }
+      }
+    },
+    created() {
+      // const CUR_ENV = 'release'
+      // const baseRoot = `https://sdptest.shijicloud.com/static/sdp_app/web/${CUR_ENV}`
+      // let _version = 'V2.09.00.04'
+      // const cssPath = `${ baseRoot }/${ _version }/sdp.css`
+      // const jsPath = `${ baseRoot }/${ _version }/sdp.umd.min.js`
+      // asyncLoadFile(cssPath, 'link'),
+      // asyncLoadFile(jsPath),
+      this.shareData.api = window.sdpApi
+    },
+  }
+</script>
+
+<style scoped>
+  .head{
+    position: relative;
+
+  }
+  .sdp {
+    position: relative;
+    width:calc(100vw);
+    height:calc(100vh);
+  }
+</style>

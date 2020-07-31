@@ -19,7 +19,7 @@ export function online(token) {
   return request({
     url: '/user/online',
     method: 'post',
-    token
+    data: {token:token}
   })
 }
 

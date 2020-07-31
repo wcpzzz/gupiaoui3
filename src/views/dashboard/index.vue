@@ -1,7 +1,7 @@
 <template>
   <div>
-<!--    <sdp-board-preview @close="alert('此处应该关闭页面')" @needRefreshToken="alert('此处写更新token代码')" v-bind="shareData"></sdp-board-preview>-->
-12341
+    <!--    <sdp-board-preview @close="alert('此处应该关闭页面')" @needRefreshToken="alert('此处写更新token代码')" v-bind="shareData"></sdp-board-preview>-->
+    12341
     <!--    <div><a href="http://www.baidu.com">1234</a></div>-->
   </div>
 </template>
@@ -9,23 +9,24 @@
   import { resetToken } from '@/api/login'
   import { resetUserToken, getUserToken } from '@/api/userloginSDP'
   import Cookies from 'js-cookie'
+
   export default {
     name: 'Dashboard',
     data() {
       return {
         shareData: {
-          api:sdpApi,
-          env: { projectName:'SDP-Demo', production: true },
+          api: sdpApi,
+          env: { projectName: 'SDP-Demo', production: true },
           boardInfo: {
             // 看板的的文件夹id和看板id
             folderId: '340147788379574272410',
-            id: '339056696393453568410',
+            id: '339056696393453568410'
           },
           langCode: 'zh',
           options: {
             // SDP团队分配的租户ID，本DEMO已a025为例,
             tenantId: 't00565',
-            type:'browse'
+            type: 'browse'
           },
           themeParameters: { themeType: '0' }, // 主题: '0'经典白,'1'暗黑蓝
           remindData: ''
@@ -48,11 +49,11 @@
       }
     },
     methods: {
-/*      toOutPage() {
-        // window.location.href="http://localhost:8000"
-        window.open('http://localhost:8000/test.html')
-        // window.location.href = 'http://www.baidu.com';
-      },*/
+      /*      toOutPage() {
+              // window.location.href="http://localhost:8000"
+              window.open('http://localhost:8000/test.html')
+              // window.location.href = 'http://www.baidu.com';
+            },*/
       encrypt(data) {
         //引入crypto-js
         let CryptoJS = require('crypto-js')
@@ -77,9 +78,7 @@
             console.log(Cookies.get('USERSDP-Token'))
           })
         })
-      },
-      //尝试加载他万恶的看板
-
+      }
 
     },
     created() {

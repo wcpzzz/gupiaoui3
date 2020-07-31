@@ -68,7 +68,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/example/table2',
     name: 'Example',
-    meta: { title: '股票分析', icon: 'example' },
+    meta: { title: '报表列表', icon: 'example' },
     children: [
       // {
       //   path: 'table',
@@ -83,39 +83,57 @@ export const constantRoutes = [
       //   meta: { title: 'Tree', icon: 'tree' }
       // },
       {
+        path: 'table1',
+        name: 'Table1',
+        component: () => import('@/views/table/table1'),
+        meta: { title: '当日全额消费卡记录', icon: 'table' }
+      },
+      {
         path: 'table2',
         name: 'Table2',
-        component: () => import('@/views/table/index2'),
-        meta: { title: '换手率分析数据', icon: 'table' }
+        component: () => import('@/views/table/table2'),
+        meta: { title: '多次同消费金额记录', icon: 'table' }
       },
       {
         path: 'table3',
         name: 'Table3',
-        component: () => import('@/views/table/index3'),
-        meta: { title: '个股相对大盘分析', icon: 'table' }
-      },
-      {
-        path: 'table5',
-        name: 'Table5',
-        component: () => import('@/views/table/xiangliangji'),
-        meta: { title: '支持向量机', icon: 'table' }
-      },
-      {
-        path: 'table6',
-        name: 'Table6',
-        component: () => import('@/views/table/elm'),
-        meta: { title: '极限学习机', icon: 'table' }
+        component: () => import('@/views/table/table3'),
+        meta: { title: '商户消费TOP20排名', icon: 'table' }
       },
       {
         path: 'table4',
         name: 'Table4',
-        component: () => import('@/views/table/junzhi'),
-        meta: { title: '股票明细', icon: 'table' }
+        component: () => import('@/views/table/table4'),
+        meta: { title: '商户类别统计', icon: 'table' }
       },
+      {
+        path: 'table5',
+        name: 'Table5',
+        component: () => import('@/views/table/table5'),
+        meta: { title: '系统库存卡统计', icon: 'table' }
+      },
+      {
+        path: 'table6',
+        name: 'Table6',
+        component: () => import('@/views/table/table6'),
+        meta: { title: '人行售卡查询-按客户', icon: 'table' }
+      },
+      {
+        path: 'table7',
+        name: 'Table7',
+        component: () => import('@/views/table/table7'),
+        meta: { title: '人行售卡查询-按面值', icon: 'table' }
+      },
+      {
+        path: 'table8',
+        name: 'Table8',
+        component: () => import('@/views/table/table8'),
+        meta: { title: '单卡多次消费记录', icon: 'table' }
+      }
     ]
   },
 
-  {
+/*  {
     path: '/form',
     component: Layout,
     children: [
@@ -126,7 +144,7 @@ export const constantRoutes = [
         meta: { title: '信息管理', icon: 'form' }
       }
     ]
-  },
+  },*/
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
@@ -156,9 +174,11 @@ router.beforeEach((to, from, next) => {
   let token = Cookies.get('Admin-Token')
   if(to.path!='login'){
     online(token).then(()=>{
-      console.log('of')
+      console.log('offfff')
+      console.log(token+'2222222')
       next();
     }).catch(()=>{
+      console.log('gggggg')
       router.push({ path: 'login' })
       next();
     })

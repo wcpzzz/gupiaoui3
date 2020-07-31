@@ -36,18 +36,21 @@ if (process.env.NODE_ENV === 'production') {
 Vue.use(ElementUI)
 Vue.config.productionTip = false
 
+
+
+
 import VCharts from 'v-charts'
 
 Vue.use(VCharts)
 
-import sdp from '@/sdpresourse/sdp.umd.min.js'
+import sdp from '@/sdpresourse/lib/sdp.umd.min.js'
 
 Vue.use(sdp)
 
 import sdpApi from '@/sdpresourse/sdpapi.js'
-import '@/sdpresourse/iconfont.css'
-import '@/sdpresourse/app-sdp.css'
-import '@/sdpresourse/sdp.css'
+/*import '@/sdpresourse/lib/iconfont.css'
+import '@/sdpresourse/lib/app-sdp.css'*/
+import '@/sdpresourse/lib/sdp.css'
 
 import VueI18n from 'vue-i18n'
 
